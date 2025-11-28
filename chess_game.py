@@ -1,7 +1,8 @@
-import sys
 import random
-import pygame
+import sys
 from typing import List, Optional, Tuple
+
+import pygame
 
 # ---------- Konfigurasi ----------
 TILE_SIZE = 80
@@ -24,11 +25,21 @@ TEXT_COLOR = (30, 30, 30)
 
 # Unicode chess pieces (font harus mendukung). Kita akan gunakan font default pygame yang umumnya cukup.
 UNICODE_PIECES = {
-    ('w', 'K'): '\u2654', ('w', 'Q'): '\u2655', ('w', 'R'): '\u2656', ('w', 'B'): '\u2657', ('w', 'N'): '\u2658', ('w', 'P'): '\u2659',
-    ('b', 'K'): '\u265A', ('b', 'Q'): '\u265B', ('b', 'R'): '\u265C', ('b', 'B'): '\u265D', ('b', 'N'): '\u265E', ('b', 'P'): '\u265F',
+    ("w", "K"): "\u2654",
+    ("w", "Q"): "\u2655",
+    ("w", "R"): "\u2656",
+    ("w", "B"): "\u2657",
+    ("w", "N"): "\u2658",
+    ("w", "P"): "\u2659",
+    ("b", "K"): "\u265a",
+    ("b", "Q"): "\u265b",
+    ("b", "R"): "\u265c",
+    ("b", "B"): "\u265d",
+    ("b", "N"): "\u265e",
+    ("b", "P"): "\u265f",
 }
 
-PIECE_VALUES = {'K': 10000, 'Q': 900, 'R': 500, 'B': 330, 'N': 320, 'P': 100}
+PIECE_VALUES = {"K": 10000, "Q": 900, "R": 500, "B": 330, "N": 320, "P": 100}
 
 Piece = Optional[Tuple[str, str]]  # ('w'/'b', 'K','Q','R','B','N','P') atau None
 Board = List[List[Piece]]
@@ -39,13 +50,27 @@ def create_start_position() -> Board:
     board: Board = [[None for _ in range(8)] for __ in range(8)]
     # Bidak hitam (atas)
     board[0] = [
-        ('b', 'R'), ('b', 'N'), ('b', 'B'), ('b', 'Q'), ('b', 'K'), ('b', 'B'), ('b', 'N'), ('b', 'R')
+        ("b", "R"),
+        ("b", "N"),
+        ("b", "B"),
+        ("b", "Q"),
+        ("b", "K"),
+        ("b", "B"),
+        ("b", "N"),
+        ("b", "R"),
     ]
-    board[1] = [('b', 'P') for _ in range(8)]
+    board[1] = [("b", "P") for _ in range(8)]
     # Bidak putih (bawah)
-    board[6] = [('w', 'P') for _ in range(8)]
+    board[6] = [("w", "P") for _ in range(8)]
     board[7] = [
-        ('w', 'R'), ('w', 'N'), ('w', 'B'), ('w', 'Q'), ('w', 'K'), ('w', 'B'), ('w', 'N'), ('w', 'R')
+        ("w", "R"),
+        ("w", "N"),
+        ("w", "B"),
+        ("w", "Q"),
+        ("w", "K"),
+        ("w", "B"),
+        ("w", "N"),
+        ("w", "R"),
     ]
     return board
 
@@ -64,6 +89,7 @@ def is_empty(p: Piece) -> bool:
 
 # --------- Generator Langkah Pseudo-Legal ---------
 
+
 def generate_moves(board: Board, color: str) -> List[Move]:
     moves: List[Move] = []
     for r in range(8):
@@ -80,31 +106,50 @@ def get_piece_moves(board: Board, r: int, c: int) -> List[Move]:
     if piece is None:
         return []
     color, kind = piece
-    if kind == 'P':
+    if kind == "P":
         return pawn_moves(board, r, c, color)
-    elif kind == 'N':
+    elif kind == "N":
         return knight_moves(board, r, c, color)
-    elif kind == 'B':
-        return sliding_moves(board, r, c, color, directions=[(-1, -1), (-1, 1), (1, -1), (1, 1)])
-    elif kind == 'R':
-        return sliding_moves(board, r, c, color, directions=[(-1, 0), (1, 0), (0, -1), (0, 1)])
-    elif kind == 'Q':
-        return sliding_moves(board, r, c, color, directions=[(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)])
-    elif kind == 'K':
+    elif kind == "B":
+        return sliding_moves(
+            board, r, c, color, directions=[(-1, -1), (-1, 1), (1, -1), (1, 1)]
+        )
+    elif kind == "R":
+        return sliding_moves(
+            board, r, c, color, directions=[(-1, 0), (1, 0), (0, -1), (0, 1)]
+        )
+    elif kind == "Q":
+        return sliding_moves(
+            board,
+            r,
+            c,
+            color,
+            directions=[
+                (-1, -1),
+                (-1, 1),
+                (1, -1),
+                (1, 1),
+                (-1, 0),
+                (1, 0),
+                (0, -1),
+                (0, 1),
+            ],
+        )
+    elif kind == "K":
         return king_moves(board, r, c, color)
     return []
 
 
 def pawn_moves(board: Board, r: int, c: int, color: str) -> List[Move]:
     moves: List[Move] = []
-    dir_ = -1 if color == 'w' else 1
-    start_row = 6 if color == 'w' else 1
+    dir_ = -1 if color == "w" else 1
+    start_row = 6 if color == "w" else 1
     one = (r + dir_, c)
     two = (r + 2 * dir_, c)
 
     # Maju 1
     if in_bounds(*one) and is_empty(board[one[0]][one[1]]):
-        promo = 'Q' if (one[0] == 0 or one[0] == 7) else None
+        promo = "Q" if (one[0] == 0 or one[0] == 7) else None
         moves.append((r, c, one[0], one[1], promo))
         # Maju 2 dari baris awal
         if r == start_row and in_bounds(*two) and is_empty(board[two[0]][two[1]]):
@@ -114,7 +159,7 @@ def pawn_moves(board: Board, r: int, c: int, color: str) -> List[Move]:
     for dc in (-1, 1):
         rr, cc = r + dir_, c + dc
         if in_bounds(rr, cc) and is_enemy(board[rr][cc], color):
-            promo = 'Q' if (rr == 0 or rr == 7) else None
+            promo = "Q" if (rr == 0 or rr == 7) else None
             moves.append((r, c, rr, cc, promo))
 
     return moves
@@ -133,7 +178,9 @@ def knight_moves(board: Board, r: int, c: int, color: str) -> List[Move]:
     return res
 
 
-def sliding_moves(board: Board, r: int, c: int, color: str, directions: List[Tuple[int, int]]) -> List[Move]:
+def sliding_moves(
+    board: Board, r: int, c: int, color: str, directions: List[Tuple[int, int]]
+) -> List[Move]:
     res: List[Move] = []
     for dr, dc in directions:
         rr, cc = r + dr, c + dc
@@ -167,6 +214,7 @@ def king_moves(board: Board, r: int, c: int, color: str) -> List[Move]:
 
 # --------- Manipulasi Papan ---------
 
+
 def make_move(board: Board, move: Move) -> Optional[Piece]:
     r1, c1, r2, c2, promo = move
     moved = board[r1][c1]
@@ -174,14 +222,22 @@ def make_move(board: Board, move: Move) -> Optional[Piece]:
     board[r2][c2] = moved
     board[r1][c1] = None
     # Promosi pion (otomatis jadi Queen)
-    if moved and moved[1] == 'P' and promo is not None:
+    if moved and moved[1] == "P" and promo is not None:
         board[r2][c2] = (moved[0], promo)
     return captured
 
 
 # --------- Rendering ---------
 
-def draw_board(screen: pygame.Surface, font: pygame.font.Font, board: Board, selected: Optional[Tuple[int, int]], legal: List[Tuple[int, int]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int]]]):
+
+def draw_board(
+    screen: pygame.Surface,
+    font: pygame.font.Font,
+    board: Board,
+    selected: Optional[Tuple[int, int]],
+    legal: List[Tuple[int, int]],
+    last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int]]],
+):
     screen.fill(WHITE)
 
     # Gambar papan
@@ -219,7 +275,12 @@ def draw_board(screen: pygame.Surface, font: pygame.font.Font, board: Board, sel
         if board[rr][cc] is None:
             pygame.draw.circle(screen, MOVE_DOT, center, 8)
         else:
-            pygame.draw.rect(screen, (*CAPTURE_HIGHLIGHT, 140), (x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8), 3)
+            pygame.draw.rect(
+                screen,
+                (*CAPTURE_HIGHLIGHT, 140),
+                (x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8),
+                3,
+            )
 
     # Gambar bidak
     for r in range(BOARD_SIZE):
@@ -228,14 +289,19 @@ def draw_board(screen: pygame.Surface, font: pygame.font.Font, board: Board, sel
             if piece is None:
                 continue
             ch = UNICODE_PIECES[piece]
-            text = font.render(ch, True, BLACK if piece[0] == 'b' else (30, 30, 30))
-            text_rect = text.get_rect(center=(MARGIN + c * TILE_SIZE + TILE_SIZE // 2, MARGIN + r * TILE_SIZE + TILE_SIZE // 2))
+            text = font.render(ch, True, BLACK if piece[0] == "b" else (30, 30, 30))
+            text_rect = text.get_rect(
+                center=(
+                    MARGIN + c * TILE_SIZE + TILE_SIZE // 2,
+                    MARGIN + r * TILE_SIZE + TILE_SIZE // 2,
+                )
+            )
             screen.blit(text, text_rect)
 
     # Gambar koordinat file/rank
     coord_font = pygame.font.SysFont(None, 18)
-    files = 'abcdefgh'
-    ranks = '87654321'
+    files = "abcdefgh"
+    ranks = "87654321"
     # files
     for i in range(8):
         ftxt = coord_font.render(files[i], True, TEXT_COLOR)
@@ -251,6 +317,7 @@ def draw_board(screen: pygame.Surface, font: pygame.font.Font, board: Board, sel
 
 
 # --------- AI Sederhana ---------
+
 
 def choose_ai_move(board: Board, color: str) -> Optional[Move]:
     moves = generate_moves(board, color)
@@ -279,6 +346,7 @@ def choose_ai_move(board: Board, color: str) -> Optional[Move]:
 
 # --------- Input & Utilitas ---------
 
+
 def square_from_mouse(pos: Tuple[int, int]) -> Optional[Tuple[int, int]]:
     mx, my = pos
     if mx < MARGIN or my < MARGIN or mx >= WIDTH - MARGIN or my >= HEIGHT - MARGIN:
@@ -292,9 +360,10 @@ def square_from_mouse(pos: Tuple[int, int]) -> Optional[Tuple[int, int]]:
 
 # --------- Main Loop ---------
 
+
 def main():
     pygame.init()
-    pygame.display.set_caption('Catur - Pygame (Manusia vs AI)')
+    pygame.display.set_caption("Catur - Pygame (Manusia vs AI)")
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
 
@@ -302,7 +371,7 @@ def main():
     piece_font = pygame.font.SysFont(None, int(TILE_SIZE * 0.8))
 
     board = create_start_position()
-    turn = 'w'  # pemain manusia = putih; AI = hitam
+    turn = "w"  # pemain manusia = putih; AI = hitam
 
     selected: Optional[Tuple[int, int]] = None
     legal_targets: List[Tuple[int, int]] = []
@@ -320,13 +389,17 @@ def main():
                 if event.key == pygame.K_r:
                     # reset
                     board = create_start_position()
-                    turn = 'w'
+                    turn = "w"
                     selected = None
                     legal_targets = []
                     last_move = None
                     game_over = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
-                if turn == 'w':
+            elif (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and event.button == 1
+                and not game_over
+            ):
+                if turn == "w":
                     sq = square_from_mouse(event.pos)
                     if sq is None:
                         selected = None
@@ -336,7 +409,7 @@ def main():
                         piece = board[r][c]
                         # Jika belum memilih dan klik bidak sendiri -> select
                         if selected is None:
-                            if piece is not None and piece[0] == 'w':
+                            if piece is not None and piece[0] == "w":
                                 selected = (r, c)
                                 # hitung legal targets dari piece ini
                                 legal_moves = get_piece_moves(board, r, c)
@@ -359,34 +432,36 @@ def main():
                                 selected = None
                                 legal_targets = []
                                 # ganti giliran ke AI
-                                turn = 'b'
+                                turn = "b"
                             else:
                                 # kalau klik bidak sendiri yang lain, ganti pilihan
-                                if piece is not None and piece[0] == 'w':
+                                if piece is not None and piece[0] == "w":
                                     selected = (r, c)
                                     legal_moves = get_piece_moves(board, r, c)
-                                    legal_targets = [(mv[2], mv[3]) for mv in legal_moves]
+                                    legal_targets = [
+                                        (mv[2], mv[3]) for mv in legal_moves
+                                    ]
                                 else:
                                     # klik tempat lain yang tidak legal
                                     selected = None
                                     legal_targets = []
 
         # Giliran AI (hitam)
-        if not game_over and turn == 'b':
-            ai_move = choose_ai_move(board, 'b')
+        if not game_over and turn == "b":
+            ai_move = choose_ai_move(board, "b")
             if ai_move is None:
                 game_over = True
             else:
                 r1, c1, r2, c2, _ = ai_move
                 make_move(board, ai_move)
                 last_move = ((r1, c1), (r2, c2))
-                turn = 'w'
+                turn = "w"
 
         # Cek akhir permainan sederhana: jika salah satu pihak tidak punya langkah
         if not game_over:
-            if turn == 'w' and not generate_moves(board, 'w'):
+            if turn == "w" and not generate_moves(board, "w"):
                 game_over = True
-            elif turn == 'b' and not generate_moves(board, 'b'):
+            elif turn == "b" and not generate_moves(board, "b"):
                 game_over = True
 
         # Render
@@ -394,8 +469,11 @@ def main():
 
         if game_over:
             end_font = pygame.font.SysFont(None, 36)
-            msg = 'Permainan Selesai'  # Kita tidak bedakan checkmate/stalemate pada versi sederhana ini
-            text = end_font.render(msg + ' - Tekan R untuk restart', True, (200, 40, 40))
+            # Kita tidak bedakan checkmate/stalemate pada versi sederhana ini
+            msg = "Permainan Selesai"
+            text = end_font.render(
+                msg + " - Tekan R untuk restart", True, (200, 40, 40)
+            )
             screen.blit(text, text.get_rect(center=(WIDTH // 2, MARGIN // 2)))
 
         pygame.display.flip()
@@ -405,5 +483,5 @@ def main():
     sys.exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
